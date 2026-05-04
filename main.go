@@ -72,16 +72,37 @@ func main() {
 	//	fmt.Println(row)
 	//}
 
-	matches := getMatchSlice()
+	//matches := getMatchSlice()
 	//fmt.Println(matches)
-	fmt.Println(matches[1].Venue)
+	//fmt.Println(matches[1].Venue)
 
-	deliveries := getDeliverySlice()
+	//deliveries := getDeliverySlice()
 	//fmt.Println(deliveries)
-	fmt.Println(deliveries[1].BowlingTeam)
+	//fmt.Println(deliveries[1].BowlingTeam)
 
-	fmt.Println(matchIdsOfYear("2015"))
-	fmt.Println(deliveriesOfYear(matchIdsOfYear("2015"))[0])
+	//fmt.Println(matchIdsOfYear("2015"))
+	//fmt.Println(deliveriesOfYear(matchIdsOfYear("2015"))[0])
+
+	matchesPlayedPerYearOfAllTheYears()
+}
+
+func matchesPlayedPerYearOfAllTheYears() {
+	matches := getMatchSlice()
+	matchesMap := make(map[string]int)
+
+	for _, match := range matches {
+		_, exists := matchesMap[match.Season]
+		if exists {
+			matchesMap[match.Season]++
+		} else {
+			matchesMap[match.Season] = 1
+		}
+	}
+
+	fmt.Println("Number of matches played per year of all the years in IPL.")
+	for season, numOfMatches := range matchesMap {
+		fmt.Printf("%s : %d\n", season, numOfMatches)
+	}
 }
 
 func matchIdsOfYear(season string) set.Set[int] {
@@ -247,5 +268,5 @@ func fileReader(path string) []string {
 		fmt.Println("Error reading file:", err)
 		return nil
 	}
-	return csvFileData
+	return csvFileData[1:]
 }
