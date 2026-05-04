@@ -87,6 +87,28 @@ func main() {
 
 	matchesPlayedPerYearOfAllTheYears()
 	numberOfMatchesWonOfAllTeamsOverAllTheYears()
+	extraRunsConcededPerTeamIn2016()
+}
+
+func extraRunsConcededPerTeamIn2016() {
+	matchIdsOf2016 := matchIdsOfYear("2016")
+	deliveriesOf2016 := deliveriesOfYear(matchIdsOf2016)
+
+	runsConcededByEachTeam := make(map[string]int)
+	for _, delivery := range deliveriesOf2016 {
+		_, exists := runsConcededByEachTeam[delivery.BowlingTeam]
+		if exists {
+			runsConcededByEachTeam[delivery.BowlingTeam] += delivery.ExtraRuns
+		} else {
+			runsConcededByEachTeam[delivery.BowlingTeam] = delivery.ExtraRuns
+		}
+	}
+
+	fmt.Println("Extra runs conceded per team in 2016.")
+	for _, key := range slices.Sorted(maps.Keys(runsConcededByEachTeam)) {
+		fmt.Printf("%s : %d\n", key, runsConcededByEachTeam[key])
+	}
+	fmt.Println("---------------------------------------------------")
 }
 
 func numberOfMatchesWonOfAllTeamsOverAllTheYears() {
@@ -106,8 +128,8 @@ func numberOfMatchesWonOfAllTeamsOverAllTheYears() {
 	}
 
 	fmt.Println("Number of matches won of all teams over all the years of IPL.")
-	for _, key := range slices.Sorted(maps.Keys(matchesMap)) {
-		fmt.Printf("%s : %d\n", key, matchesMap[key])
+	for team, wins := range matchesMap {
+		fmt.Printf("%s : %d\n", team, wins)
 	}
 	fmt.Println("---------------------------------------------------")
 }
