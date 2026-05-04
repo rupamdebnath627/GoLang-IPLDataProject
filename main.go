@@ -84,6 +84,30 @@ func main() {
 	//fmt.Println(deliveriesOfYear(matchIdsOfYear("2015"))[0])
 
 	matchesPlayedPerYearOfAllTheYears()
+	numberOfMatchesWonOfAllTeamsOverAllTheYears()
+}
+
+func numberOfMatchesWonOfAllTeamsOverAllTheYears() {
+	matches := getMatchSlice()
+	matchesMap := make(map[string]int)
+
+	for _, match := range matches {
+		_, exists := matchesMap[match.Winner]
+		if match.Winner == "" {
+			continue
+		}
+		if exists {
+			matchesMap[match.Winner]++
+		} else {
+			matchesMap[match.Winner] = 1
+		}
+	}
+
+	fmt.Println("Number of matches won of all teams over all the years of IPL.")
+	for team, numOfMatches := range matchesMap {
+		fmt.Printf("%s : %d\n", team, numOfMatches)
+	}
+	fmt.Println("---------------------------------------------------")
 }
 
 func matchesPlayedPerYearOfAllTheYears() {
@@ -103,6 +127,7 @@ func matchesPlayedPerYearOfAllTheYears() {
 	for season, numOfMatches := range matchesMap {
 		fmt.Printf("%s : %d\n", season, numOfMatches)
 	}
+	fmt.Println("---------------------------------------------------")
 }
 
 func matchIdsOfYear(season string) set.Set[int] {
