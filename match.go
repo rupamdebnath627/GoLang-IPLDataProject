@@ -1,12 +1,14 @@
 package main
 
-import "time"
+import (
+	"github.com/golang-sql/civil"
+)
 
 type Match struct {
 	ID            int
 	Season        string
 	City          string
-	Date          time.Time
+	Date          civil.Date
 	Team1         string
 	Team2         string
 	TossWinner    string
