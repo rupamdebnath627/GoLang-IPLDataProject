@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/golang-sql/civil"
+	"github.com/hashicorp/go-set/v3"
 )
 
 // Match index positions
@@ -73,11 +74,40 @@ func main() {
 
 	matches := getMatchSlice()
 	//fmt.Println(matches)
-	fmt.Println(matches[1].City)
+	fmt.Println(matches[1].Venue)
 
 	deliveries := getDeliverySlice()
 	//fmt.Println(deliveries)
 	fmt.Println(deliveries[1].BowlingTeam)
+
+	fmt.Println(matchIdsOfYear("2015"))
+	fmt.Println(deliveriesOfYear(matchIdsOfYear("2015"))[0])
+}
+
+func matchIdsOfYear(season string) set.Set[int] {
+	matches := getMatchSlice()
+	var filteredmatches set.Set[int]
+
+	for _, match := range matches {
+		if match.Season == season {
+			filteredmatches.Insert(match.ID)
+		}
+	}
+
+	return filteredmatches
+}
+
+func deliveriesOfYear(matchIDs set.Set[int]) []Delivery {
+	deliveries := getDeliverySlice()
+	var filtereddeliveries []Delivery
+
+	for _, delivery := range deliveries {
+		if matchIDs.Contains(delivery.MatchID) {
+			filtereddeliveries = append(filtereddeliveries, delivery)
+		}
+	}
+
+	return filtereddeliveries
 }
 
 func getMatchSlice() []Match {
