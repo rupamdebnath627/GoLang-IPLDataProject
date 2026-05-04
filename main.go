@@ -4,63 +4,172 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+
+	"github.com/golang-sql/civil"
 )
 
+// Match index positions
+const (
+	id            = iota // 0
+	season               // 1
+	city                 // 2
+	date                 // 3
+	team1                // 4
+	team2                // 5
+	tossWinner           // 6
+	tossDecision         // 7
+	result               // 8
+	dlApplied            // 9
+	winner               // 10
+	winsByRun            // 11
+	winsByWicket         // 12
+	playerOfMatch        // 13
+	venue                // 14
+	umpire1              // 15
+	umpire2              // 16
+	umpire3              // 17
+)
+
+// Delivery index positions
+const (
+	matchID         = iota // 0
+	inning                 // 1
+	battingTeam            // 2
+	bowlingTeam            // 3
+	over                   // 4
+	ball                   // 5
+	batsman                // 6
+	nonStriker             // 7
+	bowler                 // 8
+	isSuperOver            // 9
+	wideRuns               // 10
+	byRuns                 // 11
+	legByRuns              // 12
+	noBallRuns             // 13
+	penaltyRuns            // 14
+	batsmanRuns            // 15
+	extraRuns              // 16
+	totalRuns              // 17
+	playerDismissed        // 18
+	dismissalKind          // 19
+	fielder                // 20
+)
+
+const matchesCSVPath = "data/matches.csv"
+const deliveriesCSVPath = "data/deliveries.csv"
+
+var csvMatchesFileData []string
+var csvDeliveriesFileData []string
+
 func main() {
-	// Match index positions
-	const (
-		id            = 0
-		season        = 1
-		city          = 2
-		date          = 3
-		team1         = 4
-		team2         = 5
-		tossWinner    = 6
-		tossDecision  = 7
-		result        = 8
-		dlApplied     = 9
-		winner        = 10
-		winsByRun     = 11
-		winsByWicket  = 12
-		playerOfMatch = 13
-		venue         = 14
-		umpire1       = 15
-		umpire2       = 16
-		umpire3       = 17
-	)
+	//csvFileData := fileReader("data/matches.csv")
+	//
+	//fmt.Println(csvFileData[1])
+	//
+	//for _, row := range customCSVSplitter(csvFileData[1]) {
+	//	fmt.Println(row)
+	//}
 
-	// Delivery index positions
-	const (
-		matchID         = 0
-		inning          = 1
-		battingTeam     = 2
-		bowlingTeam     = 3
-		over            = 4
-		ball            = 5
-		batsman         = 6
-		nonStriker      = 7
-		bowler          = 8
-		isSuperOver     = 9
-		wideRuns        = 10
-		byRuns          = 11
-		legByRuns       = 12
-		noBallRuns      = 13
-		penaltyRuns     = 14
-		batsmanRuns     = 15
-		extraRuns       = 16
-		totalRuns       = 17
-		playerDismissed = 18
-		dismissalKind   = 19
-		fielder         = 20
-	)
+	matches := getMatchSlice()
+	//fmt.Println(matches)
+	fmt.Println(matches[1].City)
 
-	csvFileData := fileReader("data/matches.csv")
+	deliveries := getDeliverySlice()
+	//fmt.Println(deliveries)
+	fmt.Println(deliveries[1].BowlingTeam)
+}
 
-	fmt.Println(csvFileData[1])
+func getMatchSlice() []Match {
+	var matches []Match
 
-	for _, row := range customCSVSplitter(csvFileData[1]) {
-		fmt.Println(row)
+	if csvMatchesFileData == nil {
+		csvMatchesFileData = fileReader(matchesCSVPath)
 	}
+
+	for _, row := range csvMatchesFileData {
+		splitRowData := customCSVSplitter(row)
+
+		id, _ := strconv.Atoi(splitRowData[id])
+		date, _ := civil.ParseDate(splitRowData[date])
+		winsByRun, _ := strconv.Atoi(splitRowData[winsByRun])
+		winsByWicket, _ := strconv.Atoi(splitRowData[winsByWicket])
+
+		match := Match{
+			ID:            id,
+			Season:        splitRowData[season],
+			City:          splitRowData[city],
+			Date:          date,
+			Team1:         splitRowData[team1],
+			Team2:         splitRowData[team2],
+			TossWinner:    splitRowData[tossWinner],
+			TossDecision:  splitRowData[tossDecision],
+			Result:        splitRowData[result],
+			DLApplied:     splitRowData[dlApplied] == "1",
+			Winner:        splitRowData[winner],
+			WinsByRun:     winsByRun,
+			WinsByWicket:  winsByWicket,
+			PlayerOfMatch: splitRowData[playerOfMatch],
+			Venue:         splitRowData[venue],
+			Umpire1:       splitRowData[umpire1],
+			Umpire2:       splitRowData[umpire2],
+			Umpire3:       splitRowData[umpire3],
+		}
+		matches = append(matches, match)
+	}
+
+	return matches
+}
+
+func getDeliverySlice() []Delivery {
+	var deliveries []Delivery
+
+	if csvDeliveriesFileData == nil {
+		csvDeliveriesFileData = fileReader(deliveriesCSVPath)
+	}
+
+	for _, row := range csvDeliveriesFileData {
+		splitRowData := customCSVSplitter(row)
+
+		matchID, _ := strconv.Atoi(splitRowData[matchID])
+		over, _ := strconv.Atoi(splitRowData[over])
+		ball, _ := strconv.Atoi(splitRowData[ball])
+		wideRuns, _ := strconv.Atoi(splitRowData[wideRuns])
+		byRuns, _ := strconv.Atoi(splitRowData[byRuns])
+		legByRuns, _ := strconv.Atoi(splitRowData[legByRuns])
+		noBallRuns, _ := strconv.Atoi(splitRowData[noBallRuns])
+		penaltyRuns, _ := strconv.Atoi(splitRowData[penaltyRuns])
+		batsmanRuns, _ := strconv.Atoi(splitRowData[batsmanRuns])
+		extraRuns, _ := strconv.Atoi(splitRowData[extraRuns])
+		totalRuns, _ := strconv.Atoi(splitRowData[totalRuns])
+
+		delivery := Delivery{
+			MatchID:         matchID,
+			Inning:          splitRowData[inning],
+			BattingTeam:     splitRowData[battingTeam],
+			BowlingTeam:     splitRowData[bowlingTeam],
+			Over:            over,
+			Ball:            ball,
+			Batsman:         splitRowData[batsman],
+			NonStriker:      splitRowData[nonStriker],
+			Bowler:          splitRowData[bowler],
+			IsSuperOver:     splitRowData[isSuperOver] == "1",
+			WideRuns:        wideRuns,
+			ByRuns:          byRuns,
+			LegByRuns:       legByRuns,
+			NoBallRuns:      noBallRuns,
+			PenaltyRuns:     penaltyRuns,
+			BatsmanRuns:     batsmanRuns,
+			ExtraRuns:       extraRuns,
+			TotalRuns:       totalRuns,
+			PlayerDismissed: splitRowData[playerDismissed],
+			DismissalKind:   splitRowData[dismissalKind],
+			Fielder:         splitRowData[fielder],
+		}
+		deliveries = append(deliveries, delivery)
+	}
+
+	return deliveries
 }
 
 func customCSVSplitter(dataRow string) []string {
