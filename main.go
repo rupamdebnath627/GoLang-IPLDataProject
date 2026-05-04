@@ -1,5 +1,11 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
 func main() {
 	// Match index positions
 	const (
@@ -48,4 +54,34 @@ func main() {
 		fielder         = 20
 	)
 
+	csvFileData := fileReader("data/matches.csv")
+
+	fmt.Println(csvFileData[1])
+}
+
+func fileReader(path string) []string {
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return nil
+	}
+
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Println("Error reading file:", err)
+		}
+	}(file)
+
+	var csvFileData []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		csvFileData = append(csvFileData, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading file:", err)
+		return nil
+	}
+	return csvFileData
 }
