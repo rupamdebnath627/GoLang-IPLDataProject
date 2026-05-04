@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"maps"
 	"os"
+	"slices"
 	"strconv"
 
 	"github.com/golang-sql/civil"
@@ -104,8 +106,8 @@ func numberOfMatchesWonOfAllTeamsOverAllTheYears() {
 	}
 
 	fmt.Println("Number of matches won of all teams over all the years of IPL.")
-	for team, numOfMatches := range matchesMap {
-		fmt.Printf("%s : %d\n", team, numOfMatches)
+	for _, key := range slices.Sorted(maps.Keys(matchesMap)) {
+		fmt.Printf("%s : %d\n", key, matchesMap[key])
 	}
 	fmt.Println("---------------------------------------------------")
 }
@@ -124,8 +126,8 @@ func matchesPlayedPerYearOfAllTheYears() {
 	}
 
 	fmt.Println("Number of matches played per year of all the years in IPL.")
-	for season, numOfMatches := range matchesMap {
-		fmt.Printf("%s : %d\n", season, numOfMatches)
+	for _, key := range slices.Sorted(maps.Keys(matchesMap)) {
+		fmt.Printf("%s : %d\n", key, matchesMap[key])
 	}
 	fmt.Println("---------------------------------------------------")
 }
