@@ -57,6 +57,31 @@ func main() {
 	csvFileData := fileReader("data/matches.csv")
 
 	fmt.Println(csvFileData[1])
+
+	for _, row := range customCSVSplitter(csvFileData[1]) {
+		fmt.Println(row)
+	}
+}
+
+func customCSVSplitter(dataRow string) []string {
+	var result []string
+	var field []rune
+	quotesActive := false
+
+	for _, c := range dataRow {
+		if c == '"' {
+			quotesActive = !quotesActive
+		} else if c == ',' && !quotesActive {
+			result = append(result, string(field))
+			field = []rune{}
+		} else {
+			field = append(field, c)
+		}
+	}
+
+	result = append(result, string(field))
+
+	return result
 }
 
 func fileReader(path string) []string {
