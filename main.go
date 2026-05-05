@@ -6,6 +6,7 @@ import (
 	"maps"
 	"os"
 	"slices"
+	"sort"
 	"strconv"
 
 	"github.com/golang-sql/civil"
@@ -66,28 +67,66 @@ var csvMatchesFileData []string
 var csvDeliveriesFileData []string
 
 func main() {
-	//csvFileData := fileReader("data/matches.csv")
-	//
-	//fmt.Println(csvFileData[1])
-	//
-	//for _, row := range customCSVSplitter(csvFileData[1]) {
-	//	fmt.Println(row)
-	//}
-
-	//matches := getMatchSlice()
-	//fmt.Println(matches)
-	//fmt.Println(matches[1].Venue)
-
-	//deliveries := getDeliverySlice()
-	//fmt.Println(deliveries)
-	//fmt.Println(deliveries[1].BowlingTeam)
-
-	//fmt.Println(matchIdsOfYear("2015"))
-	//fmt.Println(deliveriesOfYear(matchIdsOfYear("2015"))[0])
-
 	matchesPlayedPerYearOfAllTheYears()
 	numberOfMatchesWonOfAllTeamsOverAllTheYears()
 	extraRunsConcededPerTeamIn2016()
+	top10EconomicalBowlersOf2015()
+}
+
+func top10EconomicalBowlersOf2015() {
+	type playerBallsAndRuns struct {
+		runs  int
+		balls int
+	}
+
+	type bowlerEconomy struct {
+		bowler  string
+		economy float32
+	}
+
+	matchIdsOf2015 := matchIdsOfYear("2015")
+	deliveriesOf2015 := deliveriesOfYear(matchIdsOf2015)
+	playerBallsAndRunsMap := make(map[string]*playerBallsAndRuns)
+
+	for _, d := range deliveriesOf2015 {
+		if d.IsSuperOver {
+			continue
+		}
+		bowlerRuns := d.TotalRuns - d.ByRuns - d.LegByRuns - d.PenaltyRuns
+		stats, exists := playerBallsAndRunsMap[d.Bowler]
+		if !exists {
+			stats = &playerBallsAndRuns{}
+			playerBallsAndRunsMap[d.Bowler] = stats
+		}
+		if d.WideRuns == 0 && d.NoBallRuns == 0 {
+			stats.balls++
+		}
+		stats.runs += bowlerRuns
+	}
+
+	var economies []bowlerEconomy
+	for name, s := range playerBallsAndRunsMap {
+		if s.balls > 0 {
+			calcEco := (float32(s.runs) / float32(s.balls)) * 6.0
+			economies = append(economies, bowlerEconomy{name, calcEco})
+		}
+	}
+
+	sort.Slice(economies, func(i, j int) bool {
+		return economies[i].economy < economies[j].economy
+	})
+
+	fmt.Println("Top 10 economical bowlers of 2015")
+	limit := 10
+	if len(economies) < limit {
+		limit = len(economies)
+	}
+
+	for i := 0; i < limit; i++ {
+		b := economies[i]
+		fmt.Printf("%s : %.2f\n", b.bowler, b.economy)
+	}
+	fmt.Println("---------------------------------------------------")
 }
 
 func extraRunsConcededPerTeamIn2016() {
@@ -105,8 +144,8 @@ func extraRunsConcededPerTeamIn2016() {
 	}
 
 	fmt.Println("Extra runs conceded per team in 2016.")
-	for _, key := range slices.Sorted(maps.Keys(runsConcededByEachTeam)) {
-		fmt.Printf("%s : %d\n", key, runsConcededByEachTeam[key])
+	for team, runs := range runsConcededByEachTeam {
+		fmt.Printf("%s : %d\n", team, runs)
 	}
 	fmt.Println("---------------------------------------------------")
 }
